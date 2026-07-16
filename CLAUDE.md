@@ -19,12 +19,12 @@
 - **音效**：WebAudio 合成（`sfx.place/good/bad/perfect/fanfare`），無音檔；首次點「開始」時 `resume()` 解鎖 AudioContext。
 - **視覺**：牌桌主題——絨布綠桌面（radial 漸層）＋木紋頂欄＋奶油色紙牌（主題色上邊條）＋虛線牌位格＋計分板式 Consolas 計時晶片。恭賀彩帶為 JS 動態產生的 `.confetti-piece`。有 `prefers-reduced-motion` 減敏處理。
 
-## Google Sites 嵌入版（放在 Prompt/platform/，跨 repo 同步）
+## Google Sites 嵌入版（platform/）
 
-`../Prompt/platform/CRISPE卡牌配對-GoogleSites嵌入用.html` 是供 Google 協作平台「插入 → 嵌入 → 嵌入程式碼」貼上的變體（做法比照 `Rummikub/`）：即本檔去掉 `<!DOCTYPE>`／`<html>`／`<head>`／`<body>` 外殼、只留 `<meta charset>`＋`<style>`＋內容＋`<script>` 的片段；本資料夾的 `一鍵複製-貼到GoogleSites.bat` 會把嵌入碼複製到剪貼簿（bat 以 `%~dp0..\Prompt\platform\` 相對路徑指向嵌入檔，兩資料夾相對位置不可變動；嵌入框建議拉高至少 900px）。**修改本檔 index.html 後必須重新產生嵌入版**（於工作區根目錄執行，產出後記得在 Prompt repo commit）：
+`platform/CRISPE卡牌配對-GoogleSites嵌入用.html` 是供 Google 協作平台「插入 → 嵌入 → 嵌入程式碼」貼上的變體（做法比照 `Rummikub/`）：即 index.html 去掉 `<!DOCTYPE>`／`<html>`／`<head>`／`<body>` 外殼、只留 `<meta charset>`＋`<style>`＋內容＋`<script>` 的片段；同資料夾的 `一鍵複製-貼到GoogleSites.bat` 會把嵌入碼複製到剪貼簿（嵌入框建議拉高至少 900px）。**修改 index.html 後必須重新產生嵌入版**（於本專案根目錄執行）：
 
 ```bash
-python -c "import re,io;src=io.open('crispe-game/index.html',encoding='utf-8').read();style=re.search(r'<style>.*?</style>',src,re.S).group(0);body=re.search(r'<body>\n(.*)\n</body>',src,re.S).group(1);io.open('Prompt/platform/CRISPE卡牌配對-GoogleSites嵌入用.html','w',encoding='utf-8').write('<meta charset=\"UTF-8\">\n'+style+'\n\n'+body+'\n')"
+python -c "import re,io;src=io.open('index.html',encoding='utf-8').read();style=re.search(r'<style>.*?</style>',src,re.S).group(0);body=re.search(r'<body>\n(.*)\n</body>',src,re.S).group(1);io.open('platform/CRISPE卡牌配對-GoogleSites嵌入用.html','w',encoding='utf-8').write('<meta charset=\"UTF-8\">\n'+style+'\n\n'+body+'\n')"
 ```
 
 嵌入片段開頭的 `<meta charset="UTF-8">` 是刻意加的：片段被獨立開啟（本機測試）時瀏覽器編碼嗅探會失敗導致 JS 語法錯誤，加了才能雙擊直測；貼進 Google Sites 亦無害。Sites 的沙箱 iframe 可能禁 localStorage——程式內 save/load 已包 try/catch，屆時只是不記分數、遊戲照玩。
