@@ -4,7 +4,7 @@
 
 ## 遊戲規則（依 docx 規格）
 
-- **本專案採 5 格 CRISPE**（刻意與 `Prompt/` 的 6 維度不同，照 docx）：C＝角色與能力、R＝背景洞察（Insight）、S＝具體任務、P＝語氣與風格、E＝限制與條件。
+- **本專案採 5 格 CRISPE**（刻意與 `Prompt/` 的 6 維度不同）：CR＝角色與能力（Capacity/Role 合為一格）、I＝背景洞察（Insight）、S＝具體任務、P＝語氣與風格、E＝限制與條件。docx 原文把首兩格標成 C 與 R，經使用者確認改為標準拆法 CR＋I。
 - 每局從題庫隨機抽 5 個主題，每主題 5 張卡（共 25 張），依主題分 5 色。玩家把卡拖入正確提示格，每張 4 分、滿分 100。
 - 放滿 5 格才能按「✔ 確認」判分；確認後格子亮綠（✓）／紅（✗）並自動彈出答案核對頁；「↻ 重新開始」＝重進當前主題（卡牌與本題計時重置）。主題可任選、可重挑戰，分數以最近一次確認為準。
 - 全域三鍵：「▶ 開始」（開始／恢復計時，未開始前不能進主題）、「⏸ 暫停」（凍結計時＋覆蓋層鎖卡）、「🏁 完成」（停表進結算：各主題分數／用時＋總分＋總時間）。
@@ -12,7 +12,7 @@
 
 ## 架構（單一 index.html）
 
-- **資料**：`QUESTION_BANK`（13 組主題，每組 `{id, title, desc, cards:{C,R,S,P,E}}`）、`SLOTS`（五格引導語，文字照 docx）、`THEME_COLORS`（5 色，依抽出順序指派）。題庫內容**全部虛構**、貼近台灣教學／中小企業情境；卡牌文字刻意不含「角色」「任務」等關鍵字提示，玩家須理解語意才能分類——**新增題目時維持此原則**。
+- **資料**：`QUESTION_BANK`（13 組主題，每組 `{id, title, desc, cards:{CR,I,S,P,E}}`）、`SLOTS`（五格引導語，文字照 docx）、`THEME_COLORS`（5 色，依抽出順序指派）。題庫內容**全部虛構**、貼近台灣教學／中小企業情境；卡牌文字刻意不含「角色」「任務」等關鍵字提示，玩家須理解語意才能分類——**新增題目時維持此原則**。
 - **狀態**：全域 `S = {drawn, results, totalMs, started, finished, congratsShown}`，存 localStorage（key: `crispeGameState`）；重新整理後回「待命」狀態（`running=false`），按「開始」續走，總時間與各主題成績保留。版面進行中的卡牌位置**不**持久化（重整回選單）。
 - **計時**：200ms tick 累加 `S.totalMs` 與 `attemptMs`（本題時間；確認後 `boardLocked` 即停）。
 - **拖曳**：Pointer Events 自製（`pointerdown` 在卡上、`pointermove/up` 掛 document），拖曳中卡牌 `position:fixed` ＋ `pointer-events:none`，用 `elementFromPoint().closest('.slot')` 判落點；格已有卡則舊卡回手牌。卡牌 `touch-action:none` 支援觸控。判分依據 `card.dataset.slot === slot.dataset.key`（答案在 DOM 可見，課堂用途可接受）。
