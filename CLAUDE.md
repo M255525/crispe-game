@@ -19,6 +19,16 @@
 - **音效**：WebAudio 合成（`sfx.place/good/bad/perfect/fanfare`），無音檔；首次點「開始」時 `resume()` 解鎖 AudioContext。
 - **視覺**：牌桌主題——絨布綠桌面（radial 漸層）＋木紋頂欄＋奶油色紙牌（主題色上邊條）＋虛線牌位格＋計分板式 Consolas 計時晶片。恭賀彩帶為 JS 動態產生的 `.confetti-piece`。有 `prefers-reduced-motion` 減敏處理。
 
+## Google Sites 嵌入版（放在 Prompt/platform/，跨 repo 同步）
+
+`../Prompt/platform/CRISPE卡牌配對-GoogleSites嵌入用.html` 是供 Google 協作平台「插入 → 嵌入 → 嵌入程式碼」貼上的變體（做法比照 `Rummikub/`）：即本檔去掉 `<!DOCTYPE>`／`<html>`／`<head>`／`<body>` 外殼、只留 `<meta charset>`＋`<style>`＋內容＋`<script>` 的片段；同資料夾有 `一鍵複製-貼到GoogleSites.bat`（嵌入框建議拉高至少 900px）。**修改本檔 index.html 後必須重新產生嵌入版**（於工作區根目錄執行，產出後記得在 Prompt repo commit）：
+
+```bash
+python -c "import re,io;src=io.open('crispe-game/index.html',encoding='utf-8').read();style=re.search(r'<style>.*?</style>',src,re.S).group(0);body=re.search(r'<body>\n(.*)\n</body>',src,re.S).group(1);io.open('Prompt/platform/CRISPE卡牌配對-GoogleSites嵌入用.html','w',encoding='utf-8').write('<meta charset=\"UTF-8\">\n'+style+'\n\n'+body+'\n')"
+```
+
+嵌入片段開頭的 `<meta charset="UTF-8">` 是刻意加的：片段被獨立開啟（本機測試）時瀏覽器編碼嗅探會失敗導致 JS 語法錯誤，加了才能雙擊直測；貼進 Google Sites 亦無害。Sites 的沙箱 iframe 可能禁 localStorage——程式內 save/load 已包 try/catch，屆時只是不記分數、遊戲照玩。
+
 ## 指令
 
 無建置／測試指令。修改後直接開瀏覽器驗證，或 `python -m http.server <port> --directory crispe-game` 暫起伺服器測完關閉（工作區埠號 8765–8777 已被其他專案佔用，測試時用 8779 之類）。自動化驗證以 Playwright `browser_evaluate` 派發 PointerEvent 模擬拖曳最可靠（本工作區截圖偶發逾時）；注意 MCP 瀏覽器視窗可見，真人同時操作會干擾跨呼叫的狀態斷言——關鍵流程放在單一 evaluate 內完成。
