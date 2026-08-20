@@ -29,6 +29,8 @@
 
 **改完 index.html 記得重新產生 Google Sites 嵌入版**（見下方指令）——這次跑馬燈與 footnote 的改動已同步重新產生過。
 
+**操作手冊 `manual.html`**（2026-08-20 新增）：獨立頁面，內含玩法說明、CRISPE 五格對照、常見狀況、創作者資料（與 `Prompt`／`SN-maker` 等工具逐字相同的完整版本——姓名、信箱、專長、證照、經歷）、授權限制；`.topbar` 的 `.controls` 區塊新增「📖 操作手冊」連結（`target="_blank"`，避免跳走弄丟進行中的計時／拖曳狀態），CSS 新增 `a.ctl-btn` 補上 `<a>` 標籤預設沒有的 `display:inline-flex`／`text-decoration:none`／`cursor:pointer`（`.ctl-btn` 原本只針對 `<button>` 設計）。
+
 ## Google Sites 嵌入版（platform/）
 
 `platform/CRISPE卡牌配對-GoogleSites嵌入用.html` 是供 Google 協作平台「插入 → 嵌入 → 嵌入程式碼」貼上的變體（做法比照 `Rummikub/`）：即 index.html 去掉 `<!DOCTYPE>`／`<html>`／`<head>`／`<body>` 外殼、只留 `<meta charset>`＋`<style>`＋內容＋`<script>` 的片段；同資料夾的 `一鍵複製-貼到GoogleSites.bat` 會把嵌入碼複製到剪貼簿（嵌入框建議拉高至少 900px）。**修改 index.html 後必須重新產生嵌入版**（於本專案根目錄執行）：
