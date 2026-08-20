@@ -86,10 +86,10 @@ body.has-marquee .topbar{top:26px}
 .timer-chip .t-value{font-family:Consolas,monospace;font-size:22px;font-weight:700;color:var(--led);min-width:74px;text-align:right}
 .timer-chip.paused .t-value{animation:blink 1s step-end infinite}
 @keyframes blink{50%{opacity:.25}}
-.controls{display:flex;gap:8px}
+.controls{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
 .ctl-btn{
   padding:9px 18px;border-radius:10px;font-size:15px;font-weight:700;
-  color:var(--ink);background:var(--cream);
+  color:var(--ink);background:var(--cream);white-space:nowrap;
   box-shadow:0 3px 0 #c9b894,0 4px 8px rgba(0,0,0,.3);
   transition:transform .08s,box-shadow .08s;
 }
@@ -128,6 +128,7 @@ main{max-width:1180px;margin:0 auto;padding:26px 18px 60px}
 .tc-time{font-family:Consolas,monospace;color:#9b8668;font-size:12px}
 .tc-answer-link{background:none;border:none;color:#2f7d5c;font-size:12px;text-decoration:underline;padding:0}
 .menu-hint{margin-top:26px;text-align:center;color:#bfe3d2;font-size:13px}
+.install-row{margin-top:18px;text-align:center}
 .footnote{margin-top:14px;text-align:center;color:#8fc2a8;font-size:12px;line-height:1.8}
 
 /* 挑戰版面 */
@@ -228,7 +229,7 @@ main{max-width:1180px;margin:0 auto;padding:26px 18px 60px}
 }
 .panel h2{font-size:22px;font-weight:900;margin-bottom:4px}
 .panel .panel-sub{color:var(--ink-soft);font-size:13px;margin-bottom:18px}
-.panel-close-row{display:flex;justify-content:center;gap:12px;margin-top:22px}
+.panel-close-row{display:flex;justify-content:center;gap:12px;margin-top:22px;flex-wrap:wrap}
 
 /* 答案核對 */
 .answer-list{display:flex;flex-direction:column;gap:10px}
@@ -259,6 +260,23 @@ main{max-width:1180px;margin:0 auto;padding:26px 18px 60px}
 .result-total .rt-label{font-size:12px;color:#9b8668}
 .result-total .rt-value{font-size:30px;font-weight:900;color:var(--ink)}
 .result-total .rt-value.score-full{color:var(--amber-dark)}
+.score-entry{background:#fdf0d4;border-radius:12px;padding:14px 16px;margin-top:14px;text-align:center}
+.score-entry .se-hint{font-size:13px;color:var(--ink-soft);margin-bottom:10px}
+.score-entry .se-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.score-entry input{
+  font-family:inherit;font-size:14px;padding:9px 12px;border-radius:8px;
+  border:1px solid #d8c9ac;width:160px;max-width:60vw;
+}
+.share-row{display:flex;justify-content:center;gap:10px;margin-top:14px;flex-wrap:wrap}
+.lb-empty{text-align:center;color:var(--ink-soft);font-size:14px;padding:20px 0}
+.result-table .lb-rank{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:24px;height:24px;border-radius:50%;font-size:12px;font-weight:900;
+  background:#eee3cc;color:#8a7452;
+}
+.result-table .lb-rank.top1{background:#ffd76a;color:#8a5a06}
+.result-table .lb-rank.top2{background:#dbe2ea;color:#5c6672}
+.result-table .lb-rank.top3{background:#e6bd93;color:#7a4a1e}
 
 /* 暫停 */
 .pause-panel{text-align:center;background:transparent;box-shadow:none;color:var(--cream)}
@@ -301,6 +319,9 @@ main{max-width:1180px;margin:0 auto;padding:26px 18px 60px}
   .card{width:calc(50% - 8px)}
   .logo-title small{display:none}
   .timer-chip .t-value{font-size:17px;min-width:58px}
+  .ctl-btn{padding:8px 12px;font-size:13px}
+  .panel{padding:20px 18px}
+  .panel-close-row .ctl-btn{flex:1 1 auto;text-align:center}
 }
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation:none !important;transition:none !important}
@@ -324,6 +345,7 @@ main{max-width:1180px;margin:0 auto;padding:26px 18px 60px}
     <button class="ctl-btn primary" id="btnStart">▶ 開始</button>
     <button class="ctl-btn" id="btnPause" disabled>⏸ 暫停</button>
     <button class="ctl-btn" id="btnFinish" disabled>🏁 完成</button>
+    <button class="ctl-btn" id="btnLeaderboard">🏆 排行榜</button>
     <a class="ctl-btn" href="manual.html" target="_blank" rel="noopener">📖 操作手冊</a>
   </div>
 </header>
@@ -335,6 +357,9 @@ main{max-width:1180px;margin:0 auto;padding:26px 18px 60px}
     <p class="view-sub">每個主題有 <b>5 張卡牌</b>，把它們拖進正確的 CRISPE 提示格。每放對一張得 <b>4 分</b>，滿分 <b>100 分</b>。</p>
     <div class="theme-grid" id="themeGrid"></div>
     <p class="menu-hint">主題不分先後順序，可隨時重新挑戰；分數以最近一次結果為準。全部完成後按上方「🏁 完成」看總結算。</p>
+    <div class="install-row">
+      <button class="ctl-btn" id="installBtn">📲 加入主畫面</button>
+    </div>
     <p class="footnote">⚠ 本工具僅供個人娛樂與教學示範使用，禁止未經授權公開發布、販售或商業化使用。<br>創作者：蔡豐全（Mark Tsai）</p>
   </section>
 
@@ -395,9 +420,37 @@ main{max-width:1180px;margin:0 auto;padding:26px 18px 60px}
       <div><div class="rt-label">總分</div><div class="rt-value" id="resultTotal">0</div></div>
       <div><div class="rt-label">總時間</div><div class="rt-value" id="resultTime">00:00</div></div>
     </div>
+    <div class="score-entry hidden" id="scoreEntry">
+      <p class="se-hint">🏆 恭喜擠進排行榜前 10 名！輸入暱稱記錄成績：</p>
+      <div class="se-row">
+        <input type="text" id="lbNameInput" maxlength="10" placeholder="訪客">
+        <button class="ctl-btn primary" id="btnSaveScore">🏆 記錄成績</button>
+      </div>
+    </div>
+    <div class="share-row">
+      <button class="ctl-btn" id="btnDownloadResult">💾 下載成績圖</button>
+      <button class="ctl-btn hidden" id="btnShareResult">📤 分享成績</button>
+    </div>
     <div class="panel-close-row">
       <button class="ctl-btn" id="btnResumeGame">← 繼續挑戰</button>
+      <button class="ctl-btn" id="btnShowLeaderboard">🏆 排行榜</button>
       <button class="ctl-btn primary" id="btnNewGame">🔄 再玩一局（重抽主題）</button>
+    </div>
+  </div>
+</div>
+
+<!-- 排行榜 -->
+<div class="overlay hidden" id="leaderboardOverlay">
+  <div class="panel">
+    <h2>🏆 排行榜（前 10 名）</h2>
+    <p class="panel-sub">依總分高低排序，同分以總時間較短者優先；僅記錄在這台裝置、這個瀏覽器上。</p>
+    <table class="result-table" id="lbTable">
+      <thead><tr><th>#</th><th>暱稱</th><th style="text-align:right">分數</th><th style="text-align:right">總時間</th><th style="text-align:right">日期</th></tr></thead>
+      <tbody id="lbRows"></tbody>
+    </table>
+    <p class="lb-empty hidden" id="lbEmpty">還沒有紀錄，完成一局遊戲並拿下前 10 名成績試試看！</p>
+    <div class="panel-close-row">
+      <button class="ctl-btn primary" id="btnCloseLeaderboard">關閉</button>
     </div>
   </div>
 </div>
@@ -535,11 +588,62 @@ const QUESTION_BANK = [
           S:'寫出行程宣傳文案，包含一段開頭故事、三個行程亮點和報名資訊',
           P:'樸實、有土地的溫度，帶一點豐收的喜悅',
           E:'不能寫成硬邦邦的公告格式，不誇大功效，需標明雨天備案'}},
+  {id:'car-service', title:'汽車保養廠的預約提醒簡訊',
+   desc:'「快轉保養廠」的老客戶上次進廠是三個月前，該回廠做例行保養了，服務台要發一則提醒簡訊。',
+   cards:{CR:'顧客關係經理，熟悉每輛車的保養紀錄，擅長讓客人覺得被記得而不是被推銷',
+          I:'這位客人上次做的是機油與濾芯更換，平常開車通勤為主，過去曾抱怨等待時間太長',
+          S:'寫一則簡訊，提醒該回廠保養並提供一個可線上預約的時段選項',
+          P:'簡短、貼心、不強迫，像老朋友提醒而非業務推銷',
+          E:'不超過七十字，不能提到具體金額，需說明可現場等或預約接送'}},
+  {id:'library', title:'圖書館兒童說故事活動的宣傳文案',
+   desc:'市立圖書館週六下午要辦「勇敢的小恐龍」主題說故事時間，要寫一份給家長看的活動介紹。',
+   cards:{CR:'辦過上百場親子活動的推廣組館員，最懂怎麼讓家長覺得「這半小時值得帶小孩來」',
+          I:'適合三到八歲兒童，需事先登記、限額二十組親子，活動後有簡單手作可帶回家',
+          S:'寫一段一百五十字的活動介紹，並列出時間地點與報名方式',
+          P:'溫馨、活潑，帶一點想像力，像在跟孩子說話',
+          E:'不能用「免費」當開頭吸引詞，需提醒需自備水壺，活動全程約四十分鐘'}},
+  {id:'realtor', title:'房屋仲介的物件介紹文',
+   desc:'一間屋齡十五年的三房兩廳要上架售屋網站，仲介需要寫一段吸引小家庭關注的物件介紹。',
+   cards:{CR:'深耕同一個生活圈八年的社區型房仲，最擅長把物件的生活細節寫成畫面',
+          I:'步行五分鐘到國小、附近有傳統市場，屋況正常但廚房需要局部翻新，屋主希望儘快成交',
+          S:'寫一段兩百字的物件介紹，並列出三個最適合小家庭的理由',
+          P:'誠懇、具體，不誇大，讓人看得出真的了解這個社區',
+          E:'不能隱瞞需要翻新的部分，不使用「投資保證增值」這類用語，需標明權狀坪數'}},
+  {id:'yoga', title:'瑜伽教室的新班招生文案',
+   desc:'「拾光瑜伽」新開一班「上班族舒緩伸展」晚間課，要在社群發文招生。',
+   cards:{CR:'教了九年瑜伽的資深老師，擅長用久坐上班族聽得懂的方式解釋動作的用意',
+          I:'課程每週一次、每次六十分鐘，鎖定久坐肩頸僵硬的族群，教室備有瑜伽墊不需自備',
+          S:'寫一則貼文，包含開課理由、上課時間，並附一句吸引猶豫者報名的話',
+          P:'放鬆、真誠，不誇大功效，像在跟朋友聊近況',
+          E:'不能宣稱能治療特定疾病，不使用「速效」字眼，需附上第一堂體驗價資訊'}},
+  {id:'bookstore', title:'二手書店的本週選書推薦文',
+   desc:'「轉角舊書店」每週會在門口黑板寫一段推薦文，這週想推薦一本被低估的舊小說。',
+   cards:{CR:'開店十年的店主，讀過店裡大半的書，最會用幾句話勾起路人的好奇心',
+          I:'這本小說出版於二十年前、印量不多，情節是一個小鎮郵差的故事，店裡只剩最後一本',
+          S:'寫一段八十字以內的黑板文案，讓路過的人想翻開第一頁',
+          P:'帶點文學氣息但不賣弄，像老朋友的私房推薦',
+          E:'不能透露結局，不能使用「暢銷」這個詞，需提到只剩一本'}},
+  {id:'delay-apology', title:'網拍賣家出貨延遲的道歉信',
+   desc:'手作飾品賣家因材料延遲到貨，這批訂單要晚五天出貨，需要主動發訊息給已下單的顧客。',
+   cards:{CR:'經營網拍五年的賣家，重視回頭客，擅長在出錯時先讓客人安心而不是先找藉口',
+          I:'延遲原因是進口配件卡在海關，預計五天內到貨，這批共有十二位顧客受影響',
+          S:'寫一則主動說明的訊息，告知新的出貨時間，並提供一個表達歉意的小補償',
+          P:'誠懇、不卸責，簡短說明原因但不過度解釋',
+          E:'不能承諾具體到貨日以外的保證，補償方案需明確可執行，全文不超過兩百字'}},
+  {id:'daycare', title:'老人日照中心給家屬的聯繫信',
+   desc:'日照中心一位長輩最近用餐意願下降，社工要寫一封信給家屬說明近況並討論下一步。',
+   cards:{CR:'帶了七年長者照顧經驗的社工，擅長讓家屬感覺被同理而不是被通知一個問題',
+          I:'長輩本週有三天用餐量明顯減少，情緒平穩、沒有其他不適，家屬平常工作忙、較少到中心',
+          S:'寫一封信，說明觀察到的狀況，並提出一個可以一起討論的下一步做法',
+          P:'溫和、專業、不製造恐慌，讓家屬感覺中心有在用心照顧',
+          E:'不能做醫療診斷式的推測，不能使用「惡化」這類重詞，需邀請家屬回電討論'}},
 ];
 
 /* ══════════ 狀態 ══════════ */
 const STORAGE_KEY = 'crispeGameState';
-let S = null;            // {drawn:[id x5], results:{id:{score,timeMs,allCorrect}}, totalMs, started, finished}
+const LB_STORAGE_KEY = 'crispeGameLeaderboard';
+const LB_MAX = 10;
+let S = null;            // {drawn:[id x5], results:{id:{score,timeMs,allCorrect}}, totalMs, started, finished, lbRecorded}
 let currentThemeId = null;
 let attemptMs = 0;       // 本題本次嘗試累計時間
 let boardLocked = false; // 確認後鎖定
@@ -557,7 +661,7 @@ function shuffle(arr){
 function newGameState(){
   return {
     drawn: shuffle(QUESTION_BANK).map(t=>t.id).slice(0,5),
-    results:{}, totalMs:0, started:false, finished:false,
+    results:{}, totalMs:0, started:false, finished:false, lbRecorded:false,
   };
 }
 function saveState(){
@@ -573,6 +677,60 @@ function loadState(){
     return s;
   }catch(e){ return null; }
 }
+
+/* ══════════ 排行榜（本機前 10 名） ══════════ */
+function loadLeaderboard(){
+  try{
+    const raw = JSON.parse(localStorage.getItem(LB_STORAGE_KEY) || '[]');
+    return Array.isArray(raw) ? raw : [];
+  }catch(e){ return []; }
+}
+function saveLeaderboard(list){
+  try{ localStorage.setItem(LB_STORAGE_KEY, JSON.stringify(list)); }catch(e){}
+}
+function lbQualifies(score, timeMs){
+  const list = loadLeaderboard();
+  if(list.length < LB_MAX) return true;
+  const last = list[list.length-1];
+  return score > last.score || (score === last.score && timeMs < last.timeMs);
+}
+function lbAddEntry(name, score, timeMs){
+  const list = loadLeaderboard();
+  list.push({name: name || '訪客', score, timeMs, date: new Date().toLocaleDateString('zh-TW')});
+  list.sort((a,b)=> b.score - a.score || a.timeMs - b.timeMs);
+  list.length = Math.min(list.length, LB_MAX);
+  saveLeaderboard(list);
+  return list;
+}
+function renderLeaderboard(){
+  const list = loadLeaderboard();
+  const rows = document.getElementById('lbRows');
+  rows.innerHTML = '';
+  document.getElementById('lbEmpty').classList.toggle('hidden', list.length>0);
+  list.forEach((e, i)=>{
+    const rankCls = i===0?'top1':i===1?'top2':i===2?'top3':'';
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><span class="lb-rank ${rankCls}">${i+1}</span></td>
+      <td>${escapeHtml(e.name)}</td>
+      <td class="num">${e.score} 分</td>
+      <td class="num">${fmtTime(e.timeMs)}</td>
+      <td class="num">${escapeHtml(e.date||'')}</td>`;
+    rows.appendChild(tr);
+  });
+}
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function openLeaderboard(){
+  renderLeaderboard();
+  document.getElementById('leaderboardOverlay').classList.remove('hidden');
+}
+document.getElementById('btnLeaderboard').addEventListener('click', openLeaderboard);
+document.getElementById('btnShowLeaderboard').addEventListener('click', openLeaderboard);
+document.getElementById('btnCloseLeaderboard').addEventListener('click', ()=>{
+  document.getElementById('leaderboardOverlay').classList.add('hidden');
+});
 function themeById(id){ return QUESTION_BANK.find(t=>t.id===id); }
 function themeColor(id){ return THEME_COLORS[S.drawn.indexOf(id)] || THEME_COLORS[0]; }
 function fmtTime(ms){
@@ -981,7 +1139,141 @@ function showResult(){
   document.getElementById('resultTime').textContent = fmtTime(S.totalMs);
   document.getElementById('resultOverlay').classList.remove('hidden');
   if(total===100){ sfx.fanfare(); confetti(); }
+
+  const scoreEntry = document.getElementById('scoreEntry');
+  const qualifies = !S.lbRecorded && lbQualifies(total, S.totalMs);
+  scoreEntry.classList.toggle('hidden', !qualifies);
+  if(qualifies) document.getElementById('lbNameInput').value = '';
 }
+document.getElementById('btnSaveScore').addEventListener('click', ()=>{
+  const total = Number(document.getElementById('resultTotal').textContent) || 0;
+  const name = document.getElementById('lbNameInput').value.trim().slice(0,10);
+  lbAddEntry(name, total, S.totalMs);
+  S.lbRecorded = true;
+  saveState();
+  document.getElementById('scoreEntry').classList.add('hidden');
+  toast('已記錄到排行榜！');
+});
+
+/* ══════════ 成績圖：下載／分享 ══════════ */
+function roundRectPath(ctx,x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.arcTo(x+w,y,x+w,y+h,r);
+  ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r);
+  ctx.arcTo(x,y,x+w,y,r);
+  ctx.closePath();
+}
+function truncateText(s,n){ return s.length>n ? s.slice(0,n-1)+'…' : s; }
+function buildResultCanvas(){
+  const total = Number(document.getElementById('resultTotal').textContent) || 0;
+  const timeText = document.getElementById('resultTime').textContent;
+  const W = 720, H = 560, pad = 32;
+  const canvas = document.createElement('canvas');
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+  ctx.textBaseline = 'alphabetic';
+
+  const bgGrad = ctx.createRadialGradient(W/2,H*0.32,40,W/2,H*0.32,W*0.85);
+  bgGrad.addColorStop(0,'#2aa07e');
+  bgGrad.addColorStop(1,'#145846');
+  ctx.fillStyle = bgGrad;
+  ctx.fillRect(0,0,W,H);
+
+  roundRectPath(ctx, pad, pad, W-pad*2, H-pad*2, 18);
+  ctx.fillStyle = '#fff8ec';
+  ctx.fill();
+
+  ctx.fillStyle = '#3d2c1e';
+  ctx.font = '900 25px "Microsoft JhengHei","Segoe UI",sans-serif';
+  ctx.fillText('🎴 CRISPE 卡牌配對 — 遊戲結算', pad+26, pad+46);
+  ctx.font = '12px "Microsoft JhengHei",sans-serif';
+  ctx.fillStyle = '#9b8668';
+  ctx.fillText(new Date().toLocaleString('zh-TW'), pad+26, pad+70);
+
+  let y = pad + 110;
+  ctx.strokeStyle = '#ddcfae';
+  ctx.beginPath(); ctx.moveTo(pad+26,y-22); ctx.lineTo(W-pad-26,y-22); ctx.stroke();
+  ctx.font = '700 12px "Microsoft JhengHei",sans-serif';
+  ctx.fillStyle = '#9b8668';
+  ctx.fillText('主題', pad+26, y-30);
+
+  S.drawn.forEach((id, idx)=>{
+    const t = themeById(id);
+    const col = THEME_COLORS[idx];
+    const res = S.results[id];
+    ctx.fillStyle = col.main;
+    ctx.beginPath(); ctx.arc(pad+34, y-5, 6, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#3d2c1e';
+    ctx.font = '15px "Microsoft JhengHei",sans-serif';
+    ctx.fillText(truncateText(t.title, 22), pad+50, y);
+    ctx.font = 'bold 14px Consolas,monospace';
+    ctx.textAlign = 'right';
+    ctx.fillText(res ? res.score+' 分' : '未挑戰', W-pad-90, y);
+    ctx.fillText(res ? fmtTime(res.timeMs) : '—', W-pad-26, y);
+    ctx.textAlign = 'left';
+    y += 42;
+  });
+
+  y += 10;
+  const boxW = W-pad*2-52, boxH = 78;
+  roundRectPath(ctx, pad+26, y, boxW, boxH, 12);
+  ctx.fillStyle = '#f6ecd6';
+  ctx.fill();
+  ctx.textAlign = 'center';
+  ctx.font = '12px "Microsoft JhengHei",sans-serif';
+  ctx.fillStyle = '#9b8668';
+  ctx.fillText('總分', pad+26+boxW*0.25, y+22);
+  ctx.fillText('總時間', pad+26+boxW*0.75, y+22);
+  ctx.font = '900 32px Consolas,monospace';
+  ctx.fillStyle = total===100 ? '#d99417' : '#3d2c1e';
+  ctx.fillText(String(total), pad+26+boxW*0.25, y+56);
+  ctx.fillStyle = '#3d2c1e';
+  ctx.fillText(timeText, pad+26+boxW*0.75, y+56);
+
+  ctx.font = '12px "Microsoft JhengHei",sans-serif';
+  ctx.fillStyle = '#9b8668';
+  ctx.fillText('CRISPE 卡牌配對練習遊戲 · 創作者：蔡豐全（Mark Tsai）', W/2, H-pad-8);
+  ctx.textAlign = 'left';
+
+  return canvas;
+}
+document.getElementById('btnDownloadResult').addEventListener('click', ()=>{
+  const canvas = buildResultCanvas();
+  canvas.toBlob(function(blob){
+    if(!blob) return;
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'CRISPE成績_' + Date.now() + '.png';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 2000);
+  });
+});
+(function initShareButton(){
+  const shareBtn = document.getElementById('btnShareResult');
+  if(!navigator.share || !navigator.canShare) return;
+  shareBtn.classList.remove('hidden');
+  shareBtn.addEventListener('click', ()=>{
+    const canvas = buildResultCanvas();
+    canvas.toBlob(function(blob){
+      if(!blob) return;
+      const file = new File([blob], 'CRISPE成績.png', {type:'image/png'});
+      if(navigator.canShare({files:[file]})){
+        navigator.share({
+          files:[file],
+          title:'CRISPE 卡牌配對成績',
+          text:'我在 CRISPE 卡牌配對拿下 ' + document.getElementById('resultTotal').textContent + ' 分！'
+        }).catch(()=>{});
+      }else{
+        window.alert('這個瀏覽器不支援分享圖片，請改用「下載成績圖」');
+      }
+    });
+  });
+})();
 document.getElementById('btnResumeGame').addEventListener('click', ()=>{
   document.getElementById('resultOverlay').classList.add('hidden');
   S.finished = false;
@@ -1065,5 +1357,59 @@ init();
   render(loadCache());
   fetchMarquee();
   setInterval(fetchMarquee, REFRESH_MS);
+})();
+</script>
+
+<script>
+/* PWA 加入主畫面 — 獨立運作，跟上面遊戲邏輯無關 */
+(function () {
+  'use strict';
+  var deferredPrompt = null;
+  var btn = document.getElementById('installBtn');
+
+  var ua = navigator.userAgent || '';
+  var isIOSDevice = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  var isMacDesktop = /Macintosh/.test(ua) && !isIOSDevice;
+  var isSafariEngine = /^((?!chrome|crios|fxios|edgios|android).)*safari/i.test(ua);
+  var isStandalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true;
+
+  function fallbackMessage() {
+    if (isIOSDevice) return '請點畫面上的「分享」圖示，選「加入主畫面」';
+    if (isMacDesktop && isSafariEngine) return '請用選單列「檔案」→「加入 Dock」（Safari 17 以上）';
+    return '瀏覽器不支援，或已安裝過';
+  }
+
+  window.addEventListener('beforeinstallprompt', function (e) {
+    e.preventDefault();
+    deferredPrompt = e;
+  });
+  window.addEventListener('appinstalled', function () {
+    deferredPrompt = null;
+  });
+
+  if (btn) {
+    if (isStandalone) {
+      btn.style.display = 'none';
+    } else {
+      btn.addEventListener('click', function () {
+        if (!deferredPrompt) {
+          window.alert(fallbackMessage());
+          return;
+        }
+        try {
+          deferredPrompt.prompt();
+          deferredPrompt.userChoice.then(function () { deferredPrompt = null; });
+        } catch (err) {
+          window.alert(fallbackMessage());
+        }
+      });
+    }
+  }
+
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('service-worker.js').catch(function () {});
+    });
+  }
 })();
 </script>

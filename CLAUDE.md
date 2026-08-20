@@ -31,6 +31,18 @@
 
 **操作手冊 `manual.html`**（2026-08-20 新增）：獨立頁面，內含玩法說明、CRISPE 五格對照、常見狀況、創作者資料（與 `Prompt`／`SN-maker` 等工具逐字相同的完整版本——姓名、信箱、專長、證照、經歷）、授權限制；`.topbar` 的 `.controls` 區塊新增「📖 操作手冊」連結（`target="_blank"`，避免跳走弄丟進行中的計時／拖曳狀態），CSS 新增 `a.ctl-btn` 補上 `<a>` 標籤預設沒有的 `display:inline-flex`／`text-decoration:none`／`cursor:pointer`（`.ctl-btn` 原本只針對 `<button>` 設計）。
 
+## 題庫擴充、排行榜、成績分享、加入主畫面（2026-08-20 同日追加）
+
+- **題庫 13→20 組**：`QUESTION_BANK` 新增 7 組情境（汽車保養廠、圖書館兒童說故事、房屋仲介、瑜伽教室、二手書店、網拍出貨延遲道歉、老人日照中心家屬聯繫），維持既有「虛構、台灣情境、卡牌文字不含關鍵字提示」原則。**每局仍固定隨機抽 5 組**（`newGameState()` 的 `shuffle(QUESTION_BANK).slice(0,5)` 邏輯本來就支援任意池數，這次只是擴充池子，沒有改抽取邏輯）。
+
+- **本機排行榜（前 10 名）**：`localStorage` key `crispeGameLeaderboard`，比照 `fruit-ninja-cam` 的 `lbQualifies`／記名存檔模式，但門檻數是 10 不是 5。結算時（`showResult()`）算出總分，`lbQualifies(total, S.totalMs)` 判斷是否擠得進前 10（未滿 10 筆或分數更高，同分比總時間），符合才顯示 `#scoreEntry` 暱稱輸入框；`S.lbRecorded` 旗標（隨 `S` 一起存 `localStorage`）防止同一次結算重複記錄，`newGameState()` 重抽新局時會重置。右上角 topbar 常駐「🏆 排行榜」按鈕＋結算畫面內建同功能按鈕，兩者共用 `openLeaderboard()`。
+
+- **成績圖下載／分享**：`buildResultCanvas()` 用 Canvas API **手繪**一張成績卡片（不依賴 html2canvas 等外部庫，符合本工作區「零外部資源」原則）——牌桌綠色放射漸層背景＋奶油色卡片＋逐主題色點/分數/用時＋總分總時間色塊＋頁尾品牌字樣。「💾 下載成績圖」用 `canvas.toBlob()` + `<a download>` 觸發下載；「📤 分享成績」僅在偵測到 `navigator.share`／`navigator.canShare` 支援檔案分享時才顯示（`initShareButton()` 立即執行判斷），呼叫 `navigator.share({files:[file]})`，不支援的瀏覽器該按鈕維持隱藏、只能用下載。
+
+- **加入主畫面（PWA）**：`manifest.json`＋`service-worker.js`（network-first + 同源快取備援，逐字比照 `fruit-ninja-cam` 版本，`CACHE_NAME` 為 `crispe-game-shell-v1`）＋`icons/`（用 PIL 手繪產生，非外部素材：牌桌綠底＋奶油色卡片＋琥珀色頂條＋「CR」黑體字，呼應遊戲卡牌視覺；`icon-192`／`icon-512`／`icon-maskable-512`／`apple-touch-icon`）。安裝按鈕 `#installBtn` 放在 `#menuView` 的 `.menu-hint` 下方（比照 `fruit-ninja-cam` 判斷邏輯：常駐、不需進入挑戰就看得到的畫面）；安裝腳本（iOS/Mac Safari 判斷、`beforeinstallprompt`、`isStandalone` 隱藏按鈕）**逐字複製**九專案共用的已驗證版本，未自行改寫判斷邏輯，避免重蹈其他專案曾踩過的 bug。
+
+- **RWD 補強**：新增的第 5 顆 topbar 按鈕（🏆 排行榜）與結算/排行榜面板新增的按鈕列，在 375px 以下寬度原本會讓 `.panel-close-row` 文字被截斷／擠壓換行（`.ctl-btn` 原本沒有 `white-space:nowrap`，`.panel-close-row`／`.controls` 原本沒有 `flex-wrap:wrap`）。修法：`.ctl-btn` 加 `white-space:nowrap`（文字不在按鈕內換行）、`.controls` 與 `.panel-close-row` 加 `flex-wrap:wrap`（按鈕整顆换行而非文字換行），620px 斷點內另外縮小 `.ctl-btn` 的 padding/font-size 並讓 `.panel-close-row` 按鈕等寬鋪滿。已用 Playwright 在 320／375／768／1280px 寬度實測 `document.documentElement.scrollWidth` 無水平溢出，並截圖確認排行榜／成績分享/結算面板在窄螢幕下版面正常（含即時抓到工作區共用跑馬燈的真實公告內容，驗證跑馬燈整合也沒有跟著新按鈕列一起壞掉）。
+
 ## Google Sites 嵌入版（platform/）
 
 `platform/CRISPE卡牌配對-GoogleSites嵌入用.html` 是供 Google 協作平台「插入 → 嵌入 → 嵌入程式碼」貼上的變體（做法比照 `Rummikub/`）：即 index.html 去掉 `<!DOCTYPE>`／`<html>`／`<head>`／`<body>` 外殼、只留 `<meta charset>`＋`<style>`＋內容＋`<script>` 的片段；同資料夾的 `一鍵複製-貼到GoogleSites.bat` 會把嵌入碼複製到剪貼簿（嵌入框建議拉高至少 900px）。**修改 index.html 後必須重新產生嵌入版**（於本專案根目錄執行）：
