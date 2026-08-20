@@ -19,6 +19,16 @@
 - **音效**：WebAudio 合成（`sfx.place/good/bad/perfect/fanfare`），無音檔；首次點「開始」時 `resume()` 解鎖 AudioContext。
 - **視覺**：牌桌主題——絨布綠桌面（radial 漸層）＋木紋頂欄＋奶油色紙牌（主題色上邊條）＋虛線牌位格＋計分板式 Consolas 計時晶片。恭賀彩帶為 JS 動態產生的 `.confetti-piece`。有 `prefers-reduced-motion` 減敏處理。
 
+## 上線與跑馬燈／使用警語（2026-08-20）
+
+已推公開 GitHub repo：<https://github.com/M255525/crispe-game>，並啟用 GitHub Pages（legacy branch-source，`master` 分支根目錄，比照 `fruit-ninja-cam` 的實際設定而非「一律用 Actions workflow」——因為本專案根目錄本來就是 `index.html`，legacy 模式直接可用）：<https://m255525.github.io/crispe-game/>。
+
+**頂部跑馬燈**：`#marqueeBar` 抓取工作區共用的 Google Sheet 公告內容（同一個授權伺服器 Apps Script 網址，沒有序號登入機制所以直接帶空序號打，只取 `marquee` 欄位），做法與 `Rummikub`／`fruit-ninja-cam` 一致，`localStorage` key 為 `crispeGameMarquee`。**版面整合方式依本專案既有版面模型客製**（跟 `shared-widget-rollout` skill 的判斷表對應）：`.topbar` 是 `position:sticky;top:0`，所以顯示跑馬燈時要同時做兩件事——`body.has-marquee{padding-top:26px}`（把初始文件流往下推，否則 topbar 初始位置會被固定的跑馬燈蓋住）＋`body.has-marquee .topbar{top:26px}`（sticky 吸頂偏移量也加 26px，捲動後 topbar 才會吸在跑馬燈下方而不是貼齊視窗頂端）。已用 Playwright `browser_evaluate` 驗證初始渲染與捲動後兩種狀態皆無疊圖。
+
+**使用警語＋創作者資訊**：`.footnote`（「⚠ 本工具僅供個人娛樂與教學示範使用，禁止未經授權公開發布、販售或商業化使用。」＋「創作者：蔡豐全（Mark Tsai）」，文字與其餘工具逐字相同）放在 `#menuView` 的 `.menu-hint` 下方——這個遊戲沒有獨立「開始畫面」，`#menuView`（主題選單）是唯一常駐、不需要進入挑戰就看得到的畫面，所以放這裡，比照 `fruit-ninja-cam` 的判斷邏輯；不放進 `#boardView`（挑戰進行中畫面已經很滿，加常駐文字會擠壓卡牌區）。
+
+**改完 index.html 記得重新產生 Google Sites 嵌入版**（見下方指令）——這次跑馬燈與 footnote 的改動已同步重新產生過。
+
 ## Google Sites 嵌入版（platform/）
 
 `platform/CRISPE卡牌配對-GoogleSites嵌入用.html` 是供 Google 協作平台「插入 → 嵌入 → 嵌入程式碼」貼上的變體（做法比照 `Rummikub/`）：即 index.html 去掉 `<!DOCTYPE>`／`<html>`／`<head>`／`<body>` 外殼、只留 `<meta charset>`＋`<style>`＋內容＋`<script>` 的片段；同資料夾的 `一鍵複製-貼到GoogleSites.bat` 會把嵌入碼複製到剪貼簿（嵌入框建議拉高至少 900px）。**修改 index.html 後必須重新產生嵌入版**（於本專案根目錄執行）：

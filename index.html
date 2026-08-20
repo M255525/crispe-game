@@ -42,6 +42,24 @@ button{font-family:inherit;cursor:pointer;border:none}
 button:focus-visible,.theme-card:focus-visible,.card:focus-visible{outline:3px solid var(--amber);outline-offset:2px}
 .hidden{display:none !important}
 
+/* ── 頂部跑馬燈（跟工作區其他工具共用同一份 Google Sheet 公告內容）。
+   topbar 是 position:sticky，跑馬燈顯示時把 body 往下推 26px（初始版面）＋
+   topbar 的 sticky top 也加 26px（捲動吸頂時仍留在跑馬燈下方），兩者缺一都會疊圖。 */
+#marqueeBar{
+  position:fixed;top:0;left:0;right:0;height:26px;z-index:60;
+  background:rgba(20,12,6,.94);border-bottom:1px solid rgba(255,248,236,.18);
+  overflow:hidden;display:none;align-items:center;
+}
+#marqueeBar.on{display:flex}
+#marqueeTrack{
+  display:inline-block;white-space:nowrap;padding-left:100%;
+  font-size:12px;font-weight:700;color:var(--amber);
+  animation:marquee-scroll 30s linear infinite;
+}
+@keyframes marquee-scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+body.has-marquee{padding-top:26px}
+body.has-marquee .topbar{top:26px}
+
 /* ── 頂部木紋桌沿 ───────────────────────────── */
 .topbar{
   position:sticky;top:0;z-index:50;
@@ -115,6 +133,7 @@ main{max-width:1180px;margin:0 auto;padding:26px 18px 60px}
 .tc-time{font-family:Consolas,monospace;color:#9b8668;font-size:12px}
 .tc-answer-link{background:none;border:none;color:#2f7d5c;font-size:12px;text-decoration:underline;padding:0}
 .menu-hint{margin-top:26px;text-align:center;color:#bfe3d2;font-size:13px}
+.footnote{margin-top:14px;text-align:center;color:#8fc2a8;font-size:12px;line-height:1.8}
 
 /* 挑戰版面 */
 .board-head{
@@ -295,6 +314,8 @@ main{max-width:1180px;margin:0 auto;padding:26px 18px 60px}
 </head>
 <body>
 
+<div id="marqueeBar"><div id="marqueeTrack"></div></div>
+
 <header class="topbar">
   <div class="logo">
     <div class="logo-tiles" id="logoTiles" aria-hidden="true"></div>
@@ -319,6 +340,7 @@ main{max-width:1180px;margin:0 auto;padding:26px 18px 60px}
     <p class="view-sub">每個主題有 <b>5 張卡牌</b>，把它們拖進正確的 CRISPE 提示格。每放對一張得 <b>4 分</b>，滿分 <b>100 分</b>。</p>
     <div class="theme-grid" id="themeGrid"></div>
     <p class="menu-hint">主題不分先後順序，可隨時重新挑戰；分數以最近一次結果為準。全部完成後按上方「🏁 完成」看總結算。</p>
+    <p class="footnote">⚠ 本工具僅供個人娛樂與教學示範使用，禁止未經授權公開發布、販售或商業化使用。<br>創作者：蔡豐全（Mark Tsai）</p>
   </section>
 
   <!-- 單一主題挑戰 -->
@@ -1002,6 +1024,53 @@ function init(){
   saveState();
 }
 init();
+</script>
+
+<script>
+/* 頂部跑馬燈 — 獨立運作，跟上面遊戲邏輯無關；內容抓自工作區共用的授權伺服器
+   （doPost 不論序號是否有效都會附上 marquee 陣列，這個遊戲沒有序號登入機制，
+   所以直接帶空序號打，只取 marquee 欄位）。跟其他共用同一份跑馬燈 Google Sheet
+   的工具改內容互通，不需要分開維護。抓取失敗就靜默不顯示，不影響離線開玩。 */
+(function () {
+  'use strict';
+  var MARQUEE_CHECK_URL = "https://script.google.com/macros/s/AKfycbwKX0DNNbY8y4nf90BFTHtxgfqJcHHcZasRrgycl4QAe52_hkjMWSkYk4xOsqU-JPCROw/exec";
+  var STORAGE_KEY = 'crispeGameMarquee';
+  var REFRESH_MS = 20 * 60 * 1000;
+
+  var bar = document.getElementById('marqueeBar');
+  var track = document.getElementById('marqueeTrack');
+
+  function loadCache() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); } catch (e) { return []; }
+  }
+  function saveCache(items) {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(items)); } catch (e) {}
+  }
+  function render(items) {
+    if (!items || !items.length) return;
+    var text = items.join('　★　');
+    track.textContent = text + '　★　' + text;
+    bar.classList.add('on');
+    document.body.classList.add('has-marquee');
+    var width = track.scrollWidth / 2;
+    track.style.animationDuration = Math.max(width / 80, 10) + 's';
+  }
+  function fetchMarquee() {
+    fetch(MARQUEE_CHECK_URL, { method: 'POST', body: JSON.stringify({ serial: '' }) })
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (data && Array.isArray(data.marquee) && data.marquee.length) {
+          saveCache(data.marquee);
+          render(data.marquee);
+        }
+      })
+      .catch(function () {});
+  }
+
+  render(loadCache());
+  fetchMarquee();
+  setInterval(fetchMarquee, REFRESH_MS);
+})();
 </script>
 </body>
 </html>
