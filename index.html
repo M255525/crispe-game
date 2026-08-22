@@ -1340,6 +1340,10 @@ function init(){
   renderTimers();
   updateControls();
   saveState();
+  // S.finished 從上次工作階段還原時，結算畫面（內含「再玩一局」／「繼續挑戰」）不會自動重開，
+  // 但選單畫面此時「開始」鍵是 disabled、主題卡點下去只會跳 toast——沒有其他入口能離開這個狀態，
+  // 玩家會誤以為整個遊戲卡死（尤其手機瀏覽器把分頁背景回收重載後最容易發生）。這裡自動重開結算畫面補上逃生路徑。
+  if(S.finished) showResult();
 }
 init();
 </script>
