@@ -930,9 +930,25 @@ function updateConfirm(){
 
 /* ══════════ 拖曳（Pointer Events，支援滑鼠與觸控） ══════════ */
 let drag = null;
+// 手機上偶爾會有 pointerup/pointercancel 沒送達的情形（例如系統手勢搶走觸控），
+// 導致 drag 卡在非 null 永久鎖死後續拖曳；這裡統一收斂成一個可重複呼叫的還原函式，
+// 讓下一次 pointerdown／頁面失焦都能自我修復，不會整局卡死。
+function forceCancelDrag(){
+  if(!drag) return;
+  const {card, pointerId} = drag;
+  try{ card.releasePointerCapture(pointerId); }catch(err){}
+  card.classList.remove('dragging');
+  card.style.position = card.style.left = card.style.top = card.style.width = '';
+  handEl.appendChild(card);
+  slotRow.querySelectorAll('.slot').forEach(s=>s.classList.remove('drop-hover'));
+  drag = null;
+  updateHandHint();
+  updateConfirm();
+}
 function makeDraggable(card){
   card.addEventListener('pointerdown', (e)=>{
-    if(boardLocked || !running || drag) return;
+    if(boardLocked || !running) return;
+    if(drag) forceCancelDrag(); // 自我修復：若上一次拖曳因觸控事件遺失而卡住，這裡先歸位再開始新的拖曳
     e.preventDefault();
     const rect = card.getBoundingClientRect();
     drag = {
@@ -942,6 +958,7 @@ function makeDraggable(card){
       from: card.parentElement,
       pointerId: e.pointerId,
     };
+    try{ card.setPointerCapture(e.pointerId); }catch(err){}
     card.classList.add('dragging');
     card.classList.remove('placed');
     card.style.width = rect.width + 'px';
@@ -951,6 +968,10 @@ function makeDraggable(card){
     document.body.appendChild(card);
   });
 }
+// 頁面被系統手勢切走／切到背景時，觸控序列常常不會補送 pointerup/pointercancel，
+// 這裡當作安全閥，回到前景時牌已經自動歸位，不會維持卡住的視覺狀態。
+document.addEventListener('visibilitychange', ()=>{ if(document.hidden) forceCancelDrag(); });
+window.addEventListener('blur', forceCancelDrag);
 document.addEventListener('pointermove', (e)=>{
   if(!drag || e.pointerId !== drag.pointerId) return;
   drag.card.style.left = (e.clientX - drag.dx) + 'px';
@@ -960,7 +981,8 @@ document.addEventListener('pointermove', (e)=>{
 });
 document.addEventListener('pointerup', (e)=>{
   if(!drag || e.pointerId !== drag.pointerId) return;
-  const {card, from} = drag;
+  const {card, from, pointerId} = drag;
+  try{ card.releasePointerCapture(pointerId); }catch(err){}
   const slot = slotUnderPoint(e.clientX, e.clientY);
   slotRow.querySelectorAll('.slot').forEach(s=>s.classList.remove('drop-hover'));
   card.classList.remove('dragging');
@@ -984,14 +1006,9 @@ document.addEventListener('pointerup', (e)=>{
   updateHandHint();
   updateConfirm();
 });
-document.addEventListener('pointercancel', ()=>{
-  if(!drag) return;
-  const {card} = drag;
-  card.classList.remove('dragging');
-  card.style.position = card.style.left = card.style.top = card.style.width = '';
-  handEl.appendChild(card);
-  drag = null;
-  updateConfirm();
+document.addEventListener('pointercancel', (e)=>{
+  if(!drag || e.pointerId !== drag.pointerId) return;
+  forceCancelDrag();
 });
 function slotUnderPoint(x, y){
   const el = document.elementFromPoint(x, y);
