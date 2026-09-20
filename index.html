@@ -219,6 +219,9 @@ main{max-width:1180px;margin:0 auto;padding:26px 18px 60px}
   transform:rotate(2deg) scale(1.06);box-shadow:var(--shadow-lift);
   transition:none;
 }
+.card.card-selected{outline:3px solid var(--amber);outline-offset:2px;box-shadow:var(--shadow-lift);z-index:5}
+.slot.tap-hint{border-color:var(--amber);box-shadow:inset 0 0 0 2px rgba(255,185,46,.35)}
+.hand-zone.tap-hint{box-shadow:inset 0 0 0 2px rgba(255,185,46,.4),inset 0 3px 12px rgba(0,0,0,.35)}
 .card.placed{width:100%;margin:0}
 .card .card-theme-tag{font-size:10px;color:#fff;border-radius:99px;padding:1px 8px;position:absolute;top:-15px;left:8px;box-shadow:0 1px 3px rgba(0,0,0,.3)}
 .slot .card{animation:settle .18s ease-out}
@@ -335,6 +338,9 @@ main{max-width:1180px;margin:0 auto;padding:26px 18px 60px}
   .ctl-btn{padding:8px 12px;font-size:13px}
   .panel{padding:20px 18px}
   .panel-close-row .ctl-btn{flex:1 1 auto;text-align:center}
+  .topbar{gap:8px 10px;padding:8px 12px}
+  .topbar .btn-label{display:none}
+  .topbar .ctl-btn{padding:9px 11px;font-size:16px}
 }
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation:none !important;transition:none !important}
@@ -356,11 +362,11 @@ main{max-width:1180px;margin:0 auto;padding:26px 18px 60px}
     <span class="t-value" id="totalTimer">00:00</span>
   </div>
   <div class="controls">
-    <button class="ctl-btn primary" id="btnStart">▶ 開始</button>
-    <button class="ctl-btn" id="btnPause" disabled>⏸ 暫停</button>
-    <button class="ctl-btn" id="btnFinish" disabled>🏁 完成</button>
-    <button class="ctl-btn" id="btnLeaderboard">🏆 排行榜</button>
-    <a class="ctl-btn" href="manual.html" target="_blank" rel="noopener">📖 操作手冊</a>
+    <button class="ctl-btn primary" id="btnStart" title="開始">▶<span class="btn-label"> 開始</span></button>
+    <button class="ctl-btn" id="btnPause" disabled title="暫停">⏸<span class="btn-label"> 暫停</span></button>
+    <button class="ctl-btn" id="btnFinish" disabled title="完成">🏁<span class="btn-label"> 完成</span></button>
+    <button class="ctl-btn" id="btnLeaderboard" title="排行榜">🏆<span class="btn-label"> 排行榜</span></button>
+    <a class="ctl-btn" href="manual.html" target="_blank" rel="noopener" title="操作手冊">📖<span class="btn-label"> 操作手冊</span></a>
   </div>
 </header>
 
@@ -397,7 +403,7 @@ main{max-width:1180px;margin:0 auto;padding:26px 18px 60px}
       </div>
       <div class="slot-row" id="slotRow"></div>
       <div class="hand-zone">
-        <div class="hz-label">手牌區 — 將卡牌拖入上方提示格</div>
+        <div class="hz-label">手牌區 — 拖曳卡牌到上方提示格，或點一下卡牌選取、再點要放入的格子</div>
         <div class="hand" id="hand"></div>
       </div>
       <div class="board-actions">
@@ -888,6 +894,7 @@ function enterTheme(id){
   currentThemeId = id;
   attemptMs = 0;
   boardLocked = false;
+  deselectCard();
   const t = themeById(id);
   const col = themeColor(id);
   document.getElementById('topicBand').style.background = col.main;
@@ -928,6 +935,7 @@ function enterTheme(id){
 }
 function backToMenu(){
   currentThemeId = null;
+  deselectCard();
   document.getElementById('boardView').classList.add('hidden');
   document.getElementById('menuView').classList.remove('hidden');
   renderMenu();
@@ -942,7 +950,69 @@ function updateConfirm(){
   btnConfirm.disabled = !allPlaced || boardLocked;
 }
 
+/* ══════════ 點擊選取＋放置（拖曳以外的替代操作方式） ══════════ */
+let selectedCard = null;
+function updateTapHints(){
+  const on = !!selectedCard;
+  slotRow.querySelectorAll('.slot').forEach(s=>s.classList.toggle('tap-hint', on));
+  const hz = document.querySelector('.hand-zone');
+  if(hz) hz.classList.toggle('tap-hint', on);
+}
+function selectCard(card){
+  if(boardLocked || !running) return;
+  if(selectedCard === card){ deselectCard(); return; }
+  if(selectedCard) selectedCard.classList.remove('card-selected');
+  selectedCard = card;
+  card.classList.add('card-selected');
+  updateTapHints();
+  toast('已選取卡牌，點一下要放入的提示格（或手牌區收回）');
+}
+function deselectCard(){
+  if(selectedCard) selectedCard.classList.remove('card-selected');
+  selectedCard = null;
+  updateTapHints();
+}
+function moveCardToContainer(card, container){
+  const isSlotBody = container.classList.contains('slot-body');
+  if(isSlotBody){
+    const occupied = container.querySelector('.card');
+    if(occupied && occupied !== card){
+      occupied.classList.remove('placed');
+      handEl.appendChild(occupied);
+    }
+    card.classList.add('placed');
+  }else{
+    card.classList.remove('placed');
+  }
+  container.appendChild(card);
+  sfx.place();
+  deselectCard();
+  updateHandHint();
+  updateConfirm();
+}
+function handleCardTap(card){
+  if(boardLocked || !running) return;
+  if(selectedCard && selectedCard !== card){
+    moveCardToContainer(selectedCard, card.parentElement);
+  }else{
+    selectCard(card);
+  }
+}
+slotRow.addEventListener('click', (e)=>{
+  if(!selectedCard || boardLocked || !running) return;
+  if(e.target.closest('.card')) return; // 卡牌本身的點擊已由 handleCardTap 處理，避免重複觸發
+  const slot = e.target.closest('.slot');
+  if(!slot) return;
+  moveCardToContainer(selectedCard, slot.querySelector('.slot-body'));
+});
+document.querySelector('.hand-zone').addEventListener('click', (e)=>{
+  if(!selectedCard || boardLocked || !running) return;
+  if(e.target.closest('.card')) return;
+  moveCardToContainer(selectedCard, handEl);
+});
+
 /* ══════════ 拖曳（Pointer Events，支援滑鼠與觸控） ══════════ */
+const TAP_THRESHOLD = 6; // 移動距離小於此值（px）視為點擊而非拖曳
 let drag = null;
 // 手機上偶爾會有 pointerup/pointercancel 沒送達的情形（例如系統手勢搶走觸控），
 // 導致 drag 卡在非 null 永久鎖死後續拖曳；這裡統一收斂成一個可重複呼叫的還原函式，
@@ -971,6 +1041,8 @@ function makeDraggable(card){
       dy: e.clientY - rect.top,
       from: card.parentElement,
       pointerId: e.pointerId,
+      startX: e.clientX,
+      startY: e.clientY,
     };
     try{ card.setPointerCapture(e.pointerId); }catch(err){}
     card.classList.add('dragging');
@@ -995,12 +1067,23 @@ document.addEventListener('pointermove', (e)=>{
 });
 document.addEventListener('pointerup', (e)=>{
   if(!drag || e.pointerId !== drag.pointerId) return;
-  const {card, from, pointerId} = drag;
+  const {card, from, pointerId, startX, startY} = drag;
   try{ card.releasePointerCapture(pointerId); }catch(err){}
-  const slot = slotUnderPoint(e.clientX, e.clientY);
   slotRow.querySelectorAll('.slot').forEach(s=>s.classList.remove('drop-hover'));
   card.classList.remove('dragging');
   card.style.position = card.style.left = card.style.top = card.style.width = '';
+
+  const movedDist = Math.hypot(e.clientX-startX, e.clientY-startY);
+  if(movedDist < TAP_THRESHOLD){
+    // 移動距離極小 → 視為「點擊」而非拖曳：卡牌歸位原容器（若原本在格內要補回 placed 樣式），交給點擊選取/放置邏輯處理
+    from.appendChild(card);
+    if(from.classList.contains('slot-body')) card.classList.add('placed');
+    drag = null;
+    handleCardTap(card);
+    return;
+  }
+
+  const slot = slotUnderPoint(e.clientX, e.clientY);
   if(slot){
     const body = slot.querySelector('.slot-body');
     const occupied = body.querySelector('.card');
