@@ -50,6 +50,7 @@ button:focus-visible,.theme-card:focus-visible,.card:focus-visible{outline:3px s
   font-size:12px;font-weight:700;color:var(--amber);
   animation:marquee-scroll 30s linear infinite;
 }
+#marqueeBar:hover #marqueeTrack{animation-play-state:paused}
 @keyframes marquee-scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 body.has-marquee{padding-top:26px}
 body.has-marquee .topbar{top:26px}
